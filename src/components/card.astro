@@ -1,144 +1,106 @@
 ---
-const { links } = (await Astro.glob("../content/bookmarks.md"))[0].frontmatter;
+type Bookmark = { href: string; title: string; src: string; alt: string };
 
+const modules = import.meta.glob<{ frontmatter: { links: Bookmark[] } }>(
+  "../content/bookmarks.md",
+  { eager: true },
+);
+const links: Bookmark[] = Object.values(modules)[0].frontmatter.links;
 links.sort((a, b) => a.title.localeCompare(b.title));
 
+const SECTION_SIZE = 5;
+const sections: Bookmark[][] = [];
+for (let i = 0; i < links.length; i += SECTION_SIZE) {
+  sections.push(links.slice(i, i + SECTION_SIZE));
+}
 ---
+
 <section class="bookmark-sections">
-  <!-- Section 1 -->
-  <div class="bookmark-section">
-    <ul>
-      {links.slice(0, 5).map((link) => ( <!-- First 5 bookmarks -->
-        <li>
-          <a href={link.href}>
-            <img class="svg-icon" src={link.src} alt={link.alt} />
-            <span>{link.title}</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
-
-  <!-- Section 2 -->
-  <div class="bookmark-section">
-    <ul>
-      {links.slice(5, 10).map((link) => ( <!-- Next 5 bookmarks -->
-        <li>
-          <a href={link.href}>
-            <img class="svg-icon" src={link.src} alt={link.alt} />
-            <span>{link.title}</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
-
-  <!-- Section 3 -->
-  <div class="bookmark-section">
-    <ul>
-      {links.slice(10, 15).map((link) => ( <!-- Next 5 bookmarks -->
-        <li>
-          <a href={link.href}>
-            <img class="svg-icon" src={link.src} alt={link.alt} />
-            <span>{link.title}</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
-
-  <!-- Section 4 -->
-  <div class="bookmark-section">
-    <ul>
-      {links.slice(15, 20).map((link) => ( <!-- Next 5 bookmarks -->
-        <li>
-          <a href={link.href}>
-            <img class="svg-icon" src={link.src} alt={link.alt} />
-            <span>{link.title}</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
+  {
+    sections.map((section) => (
+      <div class="bookmark-section">
+        <ul>
+          {section.map((link) => (
+            <li>
+              <a href={link.href}>
+                <img class="svg-icon" src={link.src} alt={link.alt} />
+                <span>{link.title}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
 </section>
 
 <style>
   .bookmark-sections {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 240px));
+    justify-content: center;
+    gap: 16px;
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
   }
 
   .bookmark-section {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-translucent);
     backdrop-filter: blur(10px);
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    padding: 10px;
-    flex: 1 1 calc(20% - 20px);
-    border: 1px solid black
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 12px;
   }
 
   ul {
-    list-style-type: none;
+    list-style: none;
     display: grid;
-    grid-template-columns: 1fr; /* Single column per section */
-    gap: 10px; /* Space between bookmarks */
-    padding: 0;
-  }
-
-  ul li {
-    font-size: 20px;
+    gap: 6px;
   }
 
   ul li a {
-    color: var(--text-color);
+    color: var(--text);
     text-decoration: none;
     display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
     align-items: center;
-    gap: 10px;
-    padding: 15px;
-    border-radius: var(--border-radius);
-    background-color: var(--card-item-background-color);
-    transition: all 0.3s ease; /* Smooth transition for all properties */
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    background: transparent;
+    font-size: 16px;
+    transition:
+      background var(--transition),
+      transform var(--transition),
+      box-shadow var(--transition);
   }
 
   ul li a:hover {
-    background-color: var(--card-item-hover-background-color);
-    transform: scale(1.03); /* Slightly scale up the item */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for a "lifted" effect */
+    background: var(--hover);
+    transform: translateX(2px);
   }
 
   ul li a img {
-    max-width: 24px;
-    max-height: 24px;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    filter: var(--icon-filter);
+    transition: filter var(--transition);
   }
 
   ul li a span {
-    white-space: nowrap; /* Prevent text from wrapping */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .svg-icon {
-    filter: invert(0%);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .svg-icon {
-      filter: invert(100%);
-    }
-  }
-
-  @media (max-width: 600px) {
+  @media (max-width: 480px) {
     .bookmark-sections {
-      flex-direction: column;
-      gap: 10px;
+      grid-template-columns: 1fr;
+    }
+    ul li a {
+      padding: 10px 12px;
+      font-size: 15px;
     }
   }
-
 </style>

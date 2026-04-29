@@ -1,11 +1,8 @@
 ## Terminal-like Web Interface
 
-A beatiful and aesthetic start page for your browser that i made for myself based on this [aesthetic-startpage](https://github.com/stefan-yas/aesthetic-startpage). 
-<<<<<<< HEAD
+A beautiful and aesthetic start page for your browser that I made for myself, based on this [aesthetic-startpage](https://github.com/stefan-yas/aesthetic-startpage).
 
 ![Start Page Demo](startpage.mp4)
-=======
->>>>>>> 85cd6ccebb427e90fa1c20031ab49bf31c9bd1a5
 
 https://github.com/user-attachments/assets/5b2821f3-ddb9-4e37-92c9-7e6d2abc6ab1
 
@@ -17,22 +14,16 @@ https://github.com/user-attachments/assets/5b2821f3-ddb9-4e37-92c9-7e6d2abc6ab1
   - `Ctrl + C`: Clears the input field.
   - `Arrow Up/Down`: Navigates through command history.
   - `Enter`: Executes the command or query.
-  
-- **Special Commands**:
-  - `r:<query>`: Searches Reddit using Google.
-  - `m:<query>`: Searches MyAnimeList using Google.
-  - `a:<query>`: Performs an AI-based search (requires backend API).
-  - Direct URL input: Navigates directly to the entered URL.
 
-### AI Search Integration
-- You can search with `a:<query>` and ai will find the most suitable website based on your query and directly go to that website.
-- This uses *gemini-2.0-flash* and Google Programmable Search Engine Id and Api. 
+- **Special Commands**:
+  - `r:<query>`: Searches Reddit via Google.
+  - `m:<query>`: Searches MyAnimeList via Google.
+  - Direct URL input: Navigates to the entered domain.
+  - Anything else: Falls through to a Google search.
 
 ### Accessibility and Usability
 - **Autofocus**: Automatically focuses the input field when the page loads.
-- **Keydown Event**: Focuses the input field when any key is pressed.
+- **Keydown Event**: Refocuses the input when typing on the page body.
 
 ## Deployment
-Just Fork this repository and deploy it via a site like vercel.
-
-**DO NOT FORGET TO ADD ENVIROMENT VARIABLES GEMINI_API_KEY, GOOGLE_SEARCH_API_KEY, GOOGLE_SEARCH_ENGINE_ID** 
+Fork this repository and deploy it on any static host (Vercel, Netlify, GitHub Pages, etc.). No environment variables or backend are required.

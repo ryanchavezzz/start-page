@@ -1,323 +1,284 @@
 ---
-const name = "ahmetdem";
+const username = "ahmetdem";
 ---
 
 <section>
-  <p id="username">{name}@<span id="browser-info"></span> |</p>
-  <input id="terminal-input" type="text" />
+  <p id="prompt">{username}@<span id="browser-info">web</span> |</p>
+  <input id="terminal-input" type="text" autocomplete="off" spellcheck="false" />
 </section>
-
-<p id="browser-info"></p>
 
 <style>
   section {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: 5px;
-    border-radius: var(--border-radius);
-    background-color: white;
-    border: 1px solid black;
+    gap: 16px;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    background: var(--surface-translucent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    width: 100%;
+    transition:
+      border-color var(--transition),
+      box-shadow var(--transition);
+  }
+
+  section:focus-within {
+    border-color: var(--accent);
+    box-shadow:
+      var(--shadow),
+      0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
   }
 
   p {
-    font-family: var(--monospace-font-family);
-    font-size: 20px;
-  }
-
-  #username {
-    color: rgb(0, 0, 0);
+    font-family: var(--mono);
+    font-size: 18px;
+    color: var(--muted);
+    white-space: nowrap;
   }
 
   #browser-info {
-    font-size: 20px;
     font-weight: 500;
+    color: var(--accent);
   }
 
   #terminal-input {
     background: none;
     border: none;
-    font-family: var(--monospace-font-family);
-    font-size: 20px;
-    color: var(--text-color);
-    width: 750px;
+    font-family: var(--mono);
+    font-size: 18px;
+    color: var(--text);
+    flex: 1;
+    min-width: 0;
   }
 
   #terminal-input:focus {
-    border: none;
     outline: none;
   }
 
-  @media only screen and (max-width: 1200px) {
+  #terminal-input::placeholder {
+    color: var(--muted);
+  }
+
+  @media (max-width: 1040px) {
     section {
-      flex-direction: column;
-      align-items: flex-start;
+      position: fixed;
+      left: 0.75rem;
+      right: 0.75rem;
+      bottom: max(0.75rem, env(safe-area-inset-bottom));
+      width: auto;
+      max-width: none;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      z-index: 50;
+    }
+    p,
+    #terminal-input {
+      font-size: 15px;
+    }
+    #terminal-input {
+      width: 100%;
     }
   }
 
-  ul li a:hover {
-    background-color: var(--card-item-hover-background-color) !important;
-    transform: scale(1.03) !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+  :global(.bookmark-match) {
+    opacity: 1 !important;
+    transform: scale(1.02) !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 0 0 2px var(--accent) !important;
+  }
+
+  :global(.bookmark-nomatch) {
+    opacity: 0.35 !important;
+    filter: grayscale(70%) !important;
+    transform: scale(0.98) !important;
+    transition: all 0.3s ease !important;
+  }
+
+  :global(.bookmark-nomatch-parent) {
+    text-decoration: line-through !important;
+    text-decoration-color: var(--muted) !important;
+  }
+
+  :global(.bookmark-section a:hover) {
+    background: var(--hover) !important;
     opacity: 1 !important;
     filter: none !important;
+    transform: translateX(2px) !important;
   }
 </style>
 
-<p id="browser-info"></p>
-
 <script>
-  const name = "ahmetdem";
+  const PREFIX_RE = /^(?:r:|m:)/;
 
-  // Initialize browser info
-  function initializeBrowserInfo() {
-    const p = document.getElementById("browser-info");
-    const userAgent = navigator.userAgent;
-    let browser = "unknown";
-
-    if (userAgent.includes("Chrome")) {
-      browser = "chrome";
-    } else if (userAgent.includes("Firefox")) {
-      browser = "zen";
-    }
-
-    p.textContent = "ahmetdem";
+  function detectBrowser(): string {
+    const ua = navigator.userAgent;
+    if (ua.includes("Firefox")) return "firefox";
+    if (ua.includes("Edg/")) return "edge";
+    if (ua.includes("Chrome")) return "chrome";
+    if (ua.includes("Safari")) return "safari";
+    return "web";
   }
 
-  // Typing effect for placeholder
-  function typePlaceholder(input, examples, typingSpeed = 50) {
+  function typePlaceholder(input: HTMLInputElement, examples: string[], speed = 50) {
     let exampleIndex = 0;
     let charIndex = 0;
 
-    function type() {
-      if (charIndex < examples[exampleIndex].length) {
-        input.placeholder += examples[exampleIndex].charAt(charIndex);
+    function step() {
+      const current = examples[exampleIndex];
+      if (charIndex < current.length) {
+        input.placeholder += current.charAt(charIndex);
         charIndex++;
-        setTimeout(type, typingSpeed);
+        setTimeout(step, speed);
       } else {
         setTimeout(() => {
           input.placeholder = "";
           charIndex = 0;
           exampleIndex = (exampleIndex + 1) % examples.length;
-          type();
+          step();
         }, 2000);
       }
     }
-
-    type();
+    step();
   }
 
-  const styleTag = document.createElement("style");
-  styleTag.textContent = `
-  .bookmark-match {
-    opacity: 1 !important;
-    filter: brightness(1.3) !important;
-    transform: scale(1.02) !important;
-    transition: all 0.2s ease !important;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.8) !important;
-  }
-
-  .bookmark-nomatch {
-    opacity: 0.3 !important;
-    filter: grayscale(80%) !important;
-    transform: scale(0.97) !important;
-    transition: all 0.3s ease !important;
-  }
-
-  .bookmark-nomatch-parent {
-    text-decoration: line-through !important;
-  }
-
-  /* Ensure hover effects always take priority */
-  ul li a:hover {
-    background-color: var(--card-item-hover-background-color) !important;
-    transform: scale(1.03) !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
-    opacity: 1 !important;
-    filter: none !important;
-  }
-`;
-  document.head.appendChild(styleTag);
-
-  // Reset styles for all elements
-  function resetStyles(elements) {
-    elements.forEach((element) => {
-      element.classList.remove("bookmark-match", "bookmark-nomatch");
-      element.parentElement.classList.remove("bookmark-nomatch-parent");
-      element.style.mixBlendMode = ""; // Reset mixBlendMode
+  function resetStyles(elements: NodeListOf<HTMLAnchorElement>) {
+    elements.forEach((el) => {
+      el.classList.remove("bookmark-match", "bookmark-nomatch");
+      el.parentElement?.classList.remove("bookmark-nomatch-parent");
     });
   }
 
-  // Handle input events
-  function handleInput(input, elements) {
+  function stripPrefix(value: string): string {
+    return value.replace(PREFIX_RE, "");
+  }
+
+  function highlightMatches(value: string, elements: NodeListOf<HTMLAnchorElement>) {
+    if (value === "") {
+      resetStyles(elements);
+      return;
+    }
+    const needle = stripPrefix(value);
+    elements.forEach((el) => {
+      const isMatch = el.textContent!.toLowerCase().includes(needle);
+      el.classList.toggle("bookmark-match", isMatch);
+      el.classList.toggle("bookmark-nomatch", !isMatch);
+      el.parentElement?.classList.toggle("bookmark-nomatch-parent", !isMatch);
+    });
+  }
+
+  function navigate(value: string) {
+    if (value.startsWith("r:")) {
+      const q = value.slice(2).trim();
+      window.location.href = `https://google.com/search?q=${encodeURIComponent(`site:reddit.com ${q}`)}`;
+      return;
+    }
+    if (value.startsWith("m:")) {
+      const q = value.slice(2).trim();
+      window.location.href = `https://google.com/search?q=${encodeURIComponent(`site:myanimelist.net ${q}`)}`;
+      return;
+    }
+    if (/^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(value)) {
+      window.location.href = `https://${value}`;
+      return;
+    }
+    window.location.href = `https://google.com/search?q=${encodeURIComponent(value)}`;
+  }
+
+  function findBookmarkMatch(value: string, elements: NodeListOf<HTMLAnchorElement>): HTMLAnchorElement | null {
+    const needle = stripPrefix(value);
+    if (!needle) return null;
+    for (const el of elements) {
+      if (el.textContent!.toLowerCase().includes(needle)) return el;
+    }
+    return null;
+  }
+
+  function initializeTerminal() {
+    const input = document.getElementById("terminal-input") as HTMLInputElement | null;
+    const browserInfo = document.getElementById("browser-info");
+    if (!input || !browserInfo) return;
+
+    browserInfo.textContent = detectBrowser();
+
+    const examples = [
+      "how to tie a tie?",
+      "today's weather",
+      "search reddit with r:query",
+      "search myanimelist with m:query",
+      "type a domain to navigate",
+      "press ctrl+c to clear",
+    ];
+
+    const elements = document.querySelectorAll<HTMLAnchorElement>(".bookmark-section a");
+    const history: string[] = [];
+    let historyIndex = 0;
+
+    typePlaceholder(input, examples);
+    resetStyles(elements);
+
     input.addEventListener("input", () => {
-      const value = input.value.toLowerCase();
-
-      if (value === "") {
-        resetStyles(elements);
-        return;
-      }
-
-      elements.forEach((element) => {
-        const text = element.textContent.toLowerCase();
-        const isMatch = text.includes(value.replace(/^r:|^s:|^m:/, ""));
-
-        element.classList.toggle("bookmark-match", isMatch);
-        element.classList.toggle("bookmark-nomatch", !isMatch);
-        element.parentElement.classList.toggle(
-          "bookmark-nomatch-parent",
-          !isMatch,
-        );
-
-        // Set mixBlendMode based on match
-        if (value === "") {
-          element.style.mixBlendMode = "";
-        } else if (isMatch) {
-          element.style.mixBlendMode = "";
-        } else {
-          element.style.mixBlendMode = "color-burn";
-        }
-      });
+      highlightMatches(input.value.toLowerCase(), elements);
     });
 
-    // Reset styles when input is cleared or focus is lost
-    input.addEventListener("blur", function () {
-      if (input.value === "") {
-        resetStyles(elements);
-      }
+    input.addEventListener("blur", () => {
+      if (input.value === "") resetStyles(elements);
     });
-  }
-
-  // Handle keyboard events
-  function handleKeyboardEvents(input, elements) {
-    const commandHistory = [];
-    let historyIndex = -1;
 
     input.addEventListener("keydown", (event) => {
-      const value = input.value.toLowerCase();
-
-      // Ctrl+C to clear and reset
       if (event.ctrlKey && event.key === "c") {
         input.value = "";
         resetStyles(elements);
         return;
       }
 
-      // Arrow keys for command history
-      if (event.key === "ArrowUp" && historyIndex > 0) {
-        historyIndex--;
-        input.value = commandHistory[historyIndex];
-      } else if (
-        event.key === "ArrowDown" &&
-        historyIndex < commandHistory.length - 1
-      ) {
-        historyIndex++;
-        input.value = commandHistory[historyIndex];
-      } else if (event.key === "Enter") {
-        handleEnterKey(value, elements, commandHistory);
-        historyIndex = commandHistory.length;
-      }
-    });
-  }
-
-  // Handle Enter key press
-  function handleEnterKey(value, elements, commandHistory) {
-    let matchFound = false;
-
-    elements.forEach((element) => {
-      if (value === "") return;
-
-      if (
-        element.textContent
-          .toLowerCase()
-          .includes(value.replace(/^r:|^s:|^m:/, ""))
-      ) {
-        window.location.href = element.href;
-        matchFound = true;
-      }
-    });
-
-    if (!matchFound) {
-      handleSpecialCommands(value);
-    }
-
-    if (value.trim() !== "") {
-      commandHistory.push(value.trim());
-    }
-  }
-
-  // Handle special commands
-  async function handleSpecialCommands(value) {
-    if (value.startsWith("r:")) {
-      window.location.href = `https://google.com/search?q=site:reddit.com ${value.replace("r:", "")}`;
-    } else if (value.startsWith("m:")) {
-      window.location.href = `https://google.com/search?q=site:myanimelist.net ${value.replace("m:", "")}`;
-    } else if (value.startsWith("a:")) {
-      const query = value.replace("a:", "").trim();
-      try {
-        // Get search results AND AI recommendation
-        const res = await fetch(
-          `/api/aiSearch?q=${encodeURIComponent(query)}&results=true`,
-        );
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        const data = await res.json();
-
-        if (data.result && data.result.startsWith("http")) {
-          // Directly go to the AI's chosen URL
-          window.location.href = data.result;
-        } else {
-          // Fallback to Google search with AI's suggestion
-          window.location.href = `https://google.com/search?q=${encodeURIComponent(data.result || query)}`;
+      if (event.key === "ArrowUp") {
+        if (historyIndex > 0) {
+          historyIndex--;
+          input.value = history[historyIndex];
+          event.preventDefault();
         }
-      } catch (error) {
-        console.error("Error fetching AI result:", error);
-        alert("AI search failed!");
+        return;
       }
-    } else {
-      const words = value.split(".");
-      if (words.length >= 2) {
-        window.location.href = `http://${value}`;
-      } else {
-        window.location.href = `https://google.com/search?q=${value}`;
+
+      if (event.key === "ArrowDown") {
+        if (historyIndex < history.length - 1) {
+          historyIndex++;
+          input.value = history[historyIndex];
+        } else {
+          historyIndex = history.length;
+          input.value = "";
+        }
+        event.preventDefault();
+        return;
       }
-    }
-  }
 
-  // Initialize the terminal
-  function initializeTerminal() {
-    const input = document.getElementById("terminal-input");
-    const examples = [
-      "how to tie a tie?",
-      "today's weather",
-      "search on reddit with r:query",
-      "search stackoverflow with s:query",
-      "make the terminal great again",
-      "hey sexy! wanna kill all humans?",
-      "press ctrl+c to clear",
-    ];
+      if (event.key === "Enter") {
+        const value = input.value.trim();
+        if (!value) return;
 
-    const elements = document.querySelectorAll("a");
+        history.push(value);
+        historyIndex = history.length;
 
-    initializeBrowserInfo();
-    typePlaceholder(input, examples);
-    handleInput(input, elements);
-    handleKeyboardEvents(input, elements);
-    resetStyles(elements);
+        const match = findBookmarkMatch(value.toLowerCase(), elements);
+        if (match) {
+          window.location.href = match.href;
+        } else {
+          navigate(value);
+        }
+      }
+    });
 
-    // Automatically focus the input when the page loads
     input.focus();
-
-    // Focus the input when any key is pressed
-    document.addEventListener("keydown", () => input.focus());
-
-    // Reset styles when the page loads
-    document.addEventListener("DOMContentLoaded", function () {
-      resetStyles(elements);
+    document.addEventListener("keydown", (e) => {
+      if (e.target === document.body) input.focus();
     });
   }
 
-  // Run the terminal initialization
   document.addEventListener("DOMContentLoaded", initializeTerminal);
 </script>

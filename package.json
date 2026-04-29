@@ -11,10 +11,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/vercel": "^8.0.4",
-    "@google/generative-ai": "^0.23.0",
     "@tailwindcss/vite": "^4.0.17",
-    "astro": "^5.4.2"
+    "astro": "^6.1.10"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
