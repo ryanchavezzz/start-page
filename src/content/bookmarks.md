@@ -128,7 +128,14 @@ links:
     alt: maker-world-icon
   - href: https://www.facebook.com/marketplace
     title: Facebook Marketplace
+    srcLight: facebook-marketplace-light.svg
+    srcDark: facebook-marketplace-dark.svg
     alt: facebook-marketplace-icon
+  - href: https://sniffies.com
+    title: Sniffies
+    srcLight: sniffies-light.svg
+    srcDark: sniffies-dark.svg
+    alt: sniffies-icon
   - href: https://vinelink.vineapps.com/state/CA
     title: VINELink
     alt: vinelink-icon
