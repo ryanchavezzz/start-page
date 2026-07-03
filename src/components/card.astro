@@ -1,5 +1,12 @@
 ---
-type Bookmark = { href: string; title: string; src: string; alt: string };
+type Bookmark = {
+  href: string;
+  title: string;
+  alt?: string;
+  src?: string;
+  srcLight?: string;
+  srcDark?: string;
+};
 
 const modules = import.meta.glob<{ frontmatter: { links: Bookmark[] } }>(
   "../content/bookmarks.md",
@@ -23,7 +30,24 @@ for (let i = 0; i < links.length; i += SECTION_SIZE) {
           {section.map((link) => (
             <li>
               <a href={link.href}>
-                <img class="svg-icon" src={link.src} alt={link.alt} />
+                {link.srcLight && link.srcDark ? (
+                  <>
+                    <img
+                      class="svg-icon icon-light"
+                      src={link.srcLight}
+                      alt={link.alt}
+                    />
+                    <img
+                      class="svg-icon icon-dark"
+                      src={link.srcDark}
+                      alt={link.alt}
+                    />
+                  </>
+                ) : link.src ? (
+                  <img class="svg-icon" src={link.src} alt={link.alt} />
+                ) : (
+                  <span class="icon-placeholder" aria-hidden="true" />
+                )}
                 <span>{link.title}</span>
               </a>
             </li>
@@ -86,6 +110,25 @@ for (let i = 0; i < links.length; i += SECTION_SIZE) {
     flex-shrink: 0;
     filter: var(--icon-filter);
     transition: filter var(--transition);
+  }
+
+  ul li a img.icon-light,
+  ul li a img.icon-dark {
+    filter: none;
+  }
+
+  :root[data-theme="light"] ul li a img.icon-light {
+    display: none;
+  }
+
+  :root[data-theme="dark"] ul li a img.icon-dark {
+    display: none;
+  }
+
+  ul li a .icon-placeholder {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
   }
 
   ul li a span {
