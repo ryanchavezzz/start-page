@@ -7,6 +7,8 @@ type Bookmark = {
   srcLight?: string;
   srcDark?: string;
   category?: string;
+  androidApp?: string;
+  iosScheme?: string;
 };
 
 const modules = import.meta.glob<{ frontmatter: { links: Bookmark[] } }>(
@@ -37,7 +39,11 @@ const sections: Bookmark[][] = Array.from(groups.values());
         <ul>
           {section.map((link) => (
             <li>
-              <a href={link.href}>
+              <a
+                href={link.href}
+                data-android-app={link.androidApp}
+                data-ios-scheme={link.iosScheme}
+              >
                 {link.srcLight && link.srcDark ? (
                   <>
                     <img
@@ -155,3 +161,42 @@ const sections: Bookmark[][] = Array.from(groups.values());
     }
   }
 </style>
+
+<script>
+  const ua = navigator.userAgent;
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
+  document
+    .querySelectorAll<HTMLAnchorElement>(
+      "a[data-android-app], a[data-ios-scheme]",
+    )
+    .forEach((link) => {
+      const androidApp = link.dataset.androidApp;
+      const iosScheme = link.dataset.iosScheme;
+      const webUrl = link.href;
+
+      if (isAndroid && androidApp) {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          const host = webUrl.replace(/^https?:\/\//, "");
+          window.location.href =
+            `intent://${host}#Intent;scheme=https;package=${androidApp};` +
+            `S.browser_fallback_url=${encodeURIComponent(webUrl)};end`;
+        });
+      } else if (isIOS && iosScheme) {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          const start = Date.now();
+          window.location.href = iosScheme;
+          setTimeout(() => {
+            if (!document.hidden && Date.now() - start < 2000) {
+              window.location.href = webUrl;
+            }
+          }, 800);
+        });
+      }
+      // Desktop (or any device without a matching app link): fall through
+      // to the normal href navigation to the website.
+    });
+</script>

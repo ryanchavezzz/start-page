@@ -30,6 +30,8 @@ links:
     srcLight: google-voice-light.svg
     srcDark: google-voice-dark.svg
     alt: google-voice-icon
+    androidApp: com.google.android.apps.googlevoice
+    iosScheme: "googlevoice://"
     category: mail
   - href: https://calendar.google.com
     title: Google Calendar
