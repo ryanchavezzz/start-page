@@ -6,6 +6,7 @@ type Bookmark = {
   src?: string;
   srcLight?: string;
   srcDark?: string;
+  category?: string;
 };
 
 const modules = import.meta.glob<{ frontmatter: { links: Bookmark[] } }>(
@@ -13,13 +14,20 @@ const modules = import.meta.glob<{ frontmatter: { links: Bookmark[] } }>(
   { eager: true },
 );
 const links: Bookmark[] = Object.values(modules)[0].frontmatter.links;
-links.sort((a, b) => a.title.localeCompare(b.title));
 
-const SECTION_SIZE = 5;
-const sections: Bookmark[][] = [];
-for (let i = 0; i < links.length; i += SECTION_SIZE) {
-  sections.push(links.slice(i, i + SECTION_SIZE));
+// Group by category (in first-appearance order) so related bookmarks land
+// in the same box, without ever rendering the category itself as a label.
+const groups = new Map<string, Bookmark[]>();
+for (const link of links) {
+  const key = link.category ?? "other";
+  const group = groups.get(key);
+  if (group) {
+    group.push(link);
+  } else {
+    groups.set(key, [link]);
+  }
 }
+const sections: Bookmark[][] = Array.from(groups.values());
 ---
 
 <section class="bookmark-sections">
