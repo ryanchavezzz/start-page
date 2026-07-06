@@ -1,0 +1,50 @@
+---
+import type { Bookmark } from "../lib/bookmarks";
+
+export interface Props {
+  link: Pick<Bookmark, "src" | "srcLight" | "srcDark" | "alt">;
+}
+
+const { link } = Astro.props;
+---
+
+{
+  link.srcLight && link.srcDark ? (
+    <>
+      <img class="svg-icon icon-light" src={link.srcLight} alt={link.alt} />
+      <img class="svg-icon icon-dark" src={link.srcDark} alt={link.alt} />
+    </>
+  ) : link.src ? (
+    <img class="svg-icon" src={link.src} alt={link.alt} />
+  ) : (
+    <span class="icon-placeholder" aria-hidden="true" />
+  )
+}
+
+<style>
+  img.svg-icon,
+  .icon-placeholder {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  img.svg-icon {
+    filter: var(--icon-filter);
+    transition: filter var(--transition);
+  }
+
+  img.icon-light,
+  img.icon-dark {
+    filter: none;
+  }
+
+  :root[data-theme="light"] img.icon-light {
+    display: none;
+  }
+
+  :root[data-theme="dark"] img.icon-dark {
+    display: none;
+  }
+</style>

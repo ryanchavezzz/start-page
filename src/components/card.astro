@@ -1,33 +1,10 @@
 ---
-type Bookmark = {
-  href: string;
-  title: string;
-  alt?: string;
-  src?: string;
-  srcLight?: string;
-  srcDark?: string;
-  category?: string;
-};
+import { getBookmarkSections } from "../lib/bookmarks";
+import BookmarkIcon from "./BookmarkIcon.astro";
 
-const modules = import.meta.glob<{ frontmatter: { links: Bookmark[] } }>(
-  "../content/bookmarks.md",
-  { eager: true },
-);
-const links: Bookmark[] = Object.values(modules)[0].frontmatter.links;
-
-// Group by category (in first-appearance order) so related bookmarks land
+// Grouped by category (in first-appearance order) so related bookmarks land
 // in the same box, without ever rendering the category itself as a label.
-const groups = new Map<string, Bookmark[]>();
-for (const link of links) {
-  const key = link.category ?? "other";
-  const group = groups.get(key);
-  if (group) {
-    group.push(link);
-  } else {
-    groups.set(key, [link]);
-  }
-}
-const sections: Bookmark[][] = Array.from(groups.values());
+const sections = getBookmarkSections();
 ---
 
 <section class="bookmark-sections">
@@ -35,27 +12,10 @@ const sections: Bookmark[][] = Array.from(groups.values());
     sections.map((section) => (
       <div class="bookmark-section">
         <ul>
-          {section.map((link) => (
+          {section.links.map((link) => (
             <li>
               <a href={link.href}>
-                {link.srcLight && link.srcDark ? (
-                  <>
-                    <img
-                      class="svg-icon icon-light"
-                      src={link.srcLight}
-                      alt={link.alt}
-                    />
-                    <img
-                      class="svg-icon icon-dark"
-                      src={link.srcDark}
-                      alt={link.alt}
-                    />
-                  </>
-                ) : link.src ? (
-                  <img class="svg-icon" src={link.src} alt={link.alt} />
-                ) : (
-                  <span class="icon-placeholder" aria-hidden="true" />
-                )}
+                <BookmarkIcon link={link} />
                 <span>{link.title}</span>
               </a>
             </li>
@@ -110,34 +70,6 @@ const sections: Bookmark[][] = Array.from(groups.values());
   ul li a:hover {
     background: var(--hover);
     transform: translateX(2px);
-  }
-
-  ul li a img {
-    width: 18px;
-    height: 18px;
-    object-fit: contain;
-    flex-shrink: 0;
-    filter: var(--icon-filter);
-    transition: filter var(--transition);
-  }
-
-  ul li a img.icon-light,
-  ul li a img.icon-dark {
-    filter: none;
-  }
-
-  :root[data-theme="light"] ul li a img.icon-light {
-    display: none;
-  }
-
-  :root[data-theme="dark"] ul li a img.icon-dark {
-    display: none;
-  }
-
-  ul li a .icon-placeholder {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
   }
 
   ul li a span {

@@ -1,11 +1,13 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import BookmarkNav from "../components/BookmarkNav.astro";
 import Card from "../components/card.astro";
 import CommandLine from "../components/commandLine.astro";
 ---
 
 <Layout title="Welcome to your startpage.">
   <main class="content">
+    <BookmarkNav />
     <Card />
     <CommandLine />
   </main>
