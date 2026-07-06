@@ -23,10 +23,16 @@ There is no test suite and no linter configured in this repo.
   before paint (inline script, avoids flash), sets `data-theme` on `<html>`, and exposes theme via CSS custom
   properties (`--bg`, `--surface`, `--text`, `--accent`, etc.) defined in a global `<style is:global>` block. Any new
   component should theme itself through these variables rather than hardcoding colors.
-- `src/components/card.astro` — renders the bookmark grid. Reads bookmark data from `src/content/bookmarks.md`
-  frontmatter via `import.meta.glob(..., { eager: true })`, then groups bookmarks by their `category` field
-  (preserving first-appearance order) into separate "boxes". Category → display label mapping lives in the
-  `categoryLabels` record inside this component — add new categories there, not just in the bookmark data.
+- `src/lib/bookmarks.ts` — reads bookmark data from `src/content/bookmarks.md` frontmatter via
+  `import.meta.glob(..., { eager: true })` and groups bookmarks by their `category` field (preserving
+  first-appearance order) into `BookmarkSection[]`. Category → display label mapping lives in the
+  `CATEGORY_LABELS` record here — add new categories there, not just in the bookmark data.
+- `src/components/card.astro` — renders the bookmark grid ("boxes") from `getBookmarkSections()`, one box per
+  category, icons only (no visible category headers).
+- `src/components/BookmarkNav.astro` — top nav bar of per-category dropdowns (native `<details>`/`<summary>`,
+  mutually exclusive via shared `name` attribute), built from the same `getBookmarkSections()` data as the grid.
+- `src/components/BookmarkIcon.astro` — shared icon renderer (light/dark pair, single `src`, or a blank
+  placeholder) used by both `card.astro` and `BookmarkNav.astro`.
 - `src/components/commandLine.astro` — the terminal input. Contains all interactive JS:
   - special prefixes `r:` (Reddit-via-Google) and `m:` (MyAnimeList-via-Google); anything matching a bare domain
     pattern navigates directly; anything else falls through to a Google search (see `navigate()`).
