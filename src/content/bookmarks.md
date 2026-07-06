@@ -169,6 +169,7 @@ links:
     category: shopping
   - href: https://gay-torrents.net
     title: Gay-Torrents
+    src: gay-torrents.svg
     alt: gay-torrents-icon
     category: torrents
   - href: https://www.myanonamouse.net
