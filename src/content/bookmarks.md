@@ -111,6 +111,7 @@ links:
     srcDark: hacker-news-dark.svg
     alt: hacker-news-icon
     category: dev
+    favorite: 2
   - href: https://www.youtube.com/
     title: YouTube
     srcLight: youtube-light.svg
@@ -123,6 +124,7 @@ links:
     srcDark: plex-dark.svg
     alt: plex-icon
     category: media
+    favorite: 3
   - href: https://stash.rchvz.dev/
     title: Stash
     srcLight: stash-light.svg
@@ -135,6 +137,7 @@ links:
     srcDark: sniffies-dark.svg
     alt: sniffies-icon
     category: media
+    favorite: 1
   - href: https://boyfriend.tv
     title: Boyfriend.tv
     srcLight: boyfriend-light.svg
@@ -147,6 +150,7 @@ links:
     srcDark: printables-dark.svg
     alt: printables-icon
     category: printing
+    favorite: 4
   - href: https://www.thingiverse.com
     title: Thingiverse
     srcLight: thingiverse-light.svg

@@ -8,6 +8,7 @@ export type Bookmark = {
   category?: string;
   androidApp?: string;
   iosScheme?: string;
+  favorite?: number;
 };
 
 export type BookmarkSection = {
@@ -35,12 +36,22 @@ function labelFor(category: string): string {
   );
 }
 
-export function getBookmarkSections(): BookmarkSection[] {
+function getAllBookmarks(): Bookmark[] {
   const modules = import.meta.glob<{ frontmatter: { links: Bookmark[] } }>(
     "../content/bookmarks.md",
     { eager: true },
   );
-  const links: Bookmark[] = Object.values(modules)[0].frontmatter.links;
+  return Object.values(modules)[0].frontmatter.links;
+}
+
+export function getFavoriteBookmarks(): Bookmark[] {
+  return getAllBookmarks()
+    .filter((link) => link.favorite !== undefined)
+    .sort((a, b) => a.favorite! - b.favorite!);
+}
+
+export function getBookmarkSections(): BookmarkSection[] {
+  const links = getAllBookmarks();
 
   const groups = new Map<string, Bookmark[]>();
   for (const link of links) {

@@ -1,186 +1,69 @@
 ---
-import { getBookmarkSections } from "../lib/bookmarks";
+import { getFavoriteBookmarks } from "../lib/bookmarks";
 import BookmarkIcon from "./BookmarkIcon.astro";
 
-const sections = getBookmarkSections();
+const favorites = getFavoriteBookmarks();
 ---
 
-<nav class="bookmark-nav" aria-label="Bookmark categories">
-  {
-    sections.map((section) => (
-      <details class="nav-group" name="bookmark-nav">
-        <summary>{section.label}</summary>
-        <div class="dropdown">
-          <ul>
-            {section.links.map((link) => (
-              <li>
-                <a href={link.href}>
-                  <BookmarkIcon link={link} />
-                  <span>{link.title}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </details>
-    ))
-  }
+<nav class="favorites-bar" aria-label="Favorite bookmarks">
+  <ul>
+    {
+      favorites.map((link) => (
+        <li>
+          <a href={link.href}>
+            <BookmarkIcon link={link} />
+            <span>{link.title}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
 </nav>
 
 <style>
-  .bookmark-nav {
+  .favorites-bar {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  ul {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 8px;
-    width: 100%;
-  }
-
-  .nav-group {
-    position: relative;
-  }
-
-  summary {
     list-style: none;
-    cursor: pointer;
-    user-select: none;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 8px 16px;
     border-radius: var(--radius);
     border: 1px solid var(--border);
     background: var(--surface-translucent);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text);
-    transition:
-      background var(--transition),
-      border-color var(--transition);
-  }
-
-  summary::-webkit-details-marker {
-    display: none;
-  }
-
-  summary::marker {
-    content: "";
-  }
-
-  summary:hover {
-    background: var(--hover);
-  }
-
-  .nav-group[open] summary {
-    border-color: var(--accent);
-    background: var(--hover);
-  }
-
-  .dropdown {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    z-index: 60;
-    min-width: 180px;
-    max-width: min(240px, calc(100vw - 1.5rem));
-    background: var(--surface-translucent);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow);
-    padding: 8px;
-  }
-
-  .dropdown.align-right {
-    left: auto;
-    right: 0;
-  }
-
-  .dropdown ul {
-    list-style: none;
-    display: grid;
-    gap: 4px;
-  }
-
-  .dropdown a {
     color: var(--text);
     text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: var(--radius);
     font-size: 14px;
+    font-weight: 500;
     transition:
       background var(--transition),
+      border-color var(--transition),
       transform var(--transition);
   }
 
-  .dropdown a:hover {
+  a:hover {
     background: var(--hover);
-    transform: translateX(2px);
-  }
-
-  .dropdown a span {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    transform: translateY(-1px);
   }
 
   @media (max-width: 480px) {
-    summary {
+    a {
       padding: 7px 12px;
-      font-size: 13px;
-    }
-    .dropdown a {
-      padding: 7px 9px;
       font-size: 13px;
     }
   }
 </style>
-
-<script>
-  function closeOpenGroup() {
-    document
-      .querySelector<HTMLDetailsElement>(".bookmark-nav .nav-group[open]")
-      ?.removeAttribute("open");
-  }
-
-  function initBookmarkNav() {
-    const nav = document.querySelector<HTMLElement>(".bookmark-nav");
-    if (!nav) return;
-
-    nav
-      .querySelectorAll<HTMLDetailsElement>(".nav-group")
-      .forEach((details) => {
-        details.addEventListener("toggle", () => {
-          if (!details.open) return;
-          const dropdown = details.querySelector<HTMLElement>(".dropdown");
-          if (!dropdown) return;
-          dropdown.classList.remove("align-right");
-          const rect = dropdown.getBoundingClientRect();
-          if (rect.right > window.innerWidth - 8) {
-            dropdown.classList.add("align-right");
-          }
-        });
-      });
-
-    document.addEventListener("click", (event) => {
-      if (event.target instanceof Node && !nav.contains(event.target)) {
-        closeOpenGroup();
-      }
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape") return;
-      const open = document.querySelector<HTMLDetailsElement>(
-        ".bookmark-nav .nav-group[open]",
-      );
-      if (!open) return;
-      open.querySelector("summary")?.focus();
-      open.removeAttribute("open");
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded", initBookmarkNav);
-</script>

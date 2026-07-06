@@ -24,13 +24,14 @@ There is no test suite and no linter configured in this repo.
   properties (`--bg`, `--surface`, `--text`, `--accent`, etc.) defined in a global `<style is:global>` block. Any new
   component should theme itself through these variables rather than hardcoding colors.
 - `src/lib/bookmarks.ts` — reads bookmark data from `src/content/bookmarks.md` frontmatter via
-  `import.meta.glob(..., { eager: true })` and groups bookmarks by their `category` field (preserving
-  first-appearance order) into `BookmarkSection[]`. Category → display label mapping lives in the
-  `CATEGORY_LABELS` record here — add new categories there, not just in the bookmark data.
+  `import.meta.glob(..., { eager: true })`. `getBookmarkSections()` groups bookmarks by their `category` field
+  (preserving first-appearance order) into `BookmarkSection[]` for the grid; category → display label mapping
+  lives in the `CATEGORY_LABELS` record here — add new categories there, not just in the bookmark data.
+  `getFavoriteBookmarks()` returns bookmarks with a `favorite` number set, sorted ascending, for the top bar.
 - `src/components/card.astro` — renders the bookmark grid ("boxes") from `getBookmarkSections()`, one box per
   category, icons only (no visible category headers).
-- `src/components/BookmarkNav.astro` — top nav bar of per-category dropdowns (native `<details>`/`<summary>`,
-  mutually exclusive via shared `name` attribute), built from the same `getBookmarkSections()` data as the grid.
+- `src/components/BookmarkNav.astro` — top bar showing a single row of pinned favorites (bookmarks with a
+  `favorite` field set in `bookmarks.md`), built from `getFavoriteBookmarks()`.
 - `src/components/BookmarkIcon.astro` — shared icon renderer (light/dark pair, single `src`, or a blank
   placeholder) used by both `card.astro` and `BookmarkNav.astro`.
 - `src/components/commandLine.astro` — the terminal input. Contains all interactive JS:
