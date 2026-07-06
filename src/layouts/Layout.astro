@@ -75,10 +75,16 @@ const { title } = Astro.props;
 </html>
 
 <style is:global>
+  @font-face {
+    font-family: "MonoLisa";
+    src: url("/fonts/MonoLisa.woff2") format("woff2");
+    font-display: swap;
+  }
+
   :root {
     --accent: #3584e4;
     --font: "Inter", system-ui, -apple-system, sans-serif;
-    --mono: "Source Code Pro", ui-monospace, "SF Mono", Menlo, monospace;
+    --mono: "MonoLisa", "Source Code Pro", ui-monospace, "SF Mono", Menlo, monospace;
     --radius: 10px;
     --radius-lg: 16px;
     --transition: 200ms cubic-bezier(0.2, 0.8, 0.2, 1);

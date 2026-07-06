@@ -135,6 +135,12 @@ links:
     srcDark: sniffies-dark.svg
     alt: sniffies-icon
     category: media
+  - href: https://boyfriend.tv
+    title: Boyfriend.tv
+    srcLight: boyfriend-light.svg
+    srcDark: boyfriend-dark.svg
+    alt: boyfriend-icon
+    category: media
   - href: https://www.printables.com
     title: Printables
     srcLight: printables-light.svg
@@ -164,12 +170,12 @@ links:
     alt: ebay-icon
     category: shopping
   - href: https://www.facebook.com/marketplace
-    title: Facebook Marketplace
+    title: Marketplace
     srcLight: facebook-marketplace-light.svg
     srcDark: facebook-marketplace-dark.svg
     alt: facebook-marketplace-icon
     category: shopping
-  - href: https://gay-torrents.net
+  - href: https://www.gay-torrents.net/latest/
     title: Gay-Torrents
     src: gay-torrents.svg
     alt: gay-torrents-icon

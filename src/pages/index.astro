@@ -6,8 +6,10 @@ import CommandLine from "../components/commandLine.astro";
 
 <Layout title="Welcome to your startpage.">
   <main class="content">
+    <div class="top-bar">
+      <CommandLine />
+    </div>
     <Card />
-    <CommandLine />
   </main>
 </Layout>
 
@@ -21,10 +23,22 @@ import CommandLine from "../components/commandLine.astro";
     max-width: 1024px;
   }
 
+  .top-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 16px;
+    width: 100%;
+  }
+
   @media (max-width: 1040px) {
     .content {
       gap: 1.5rem;
       padding-bottom: 5.5rem;
+    }
+
+    .top-bar {
+      width: auto;
     }
   }
 </style>

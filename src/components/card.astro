@@ -30,12 +30,25 @@ for (const link of links) {
   }
 }
 const sections: Bookmark[][] = Array.from(groups.values());
+
+const categoryLabels: Record<string, string> = {
+  mail: "Mail",
+  google: "Google",
+  accounts: "Accounts",
+  dev: "Dev",
+  media: "Media",
+  printing: "3D Print",
+  shopping: "Shopping",
+  torrents: "Torrents",
+  misc: "Tools",
+};
 ---
 
 <section class="bookmark-sections">
   {
     sections.map((section) => (
       <div class="bookmark-section">
+        <p class="section-label">{categoryLabels[section[0].category ?? ""] ?? section[0].category ?? "Other"}</p>
         <ul>
           {section.map((link) => (
             <li>
@@ -89,6 +102,16 @@ const sections: Bookmark[][] = Array.from(groups.values());
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     padding: 12px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 2px 4px 8px;
+    margin: 0;
   }
 
   ul {

@@ -1,9 +1,10 @@
 ---
-const username = "ahmetdem";
 ---
 
+<p id="date-pill"><b id="date-weekday"></b><span id="date-rest"></span></p>
+
 <section>
-  <p id="prompt">{username}@<span id="browser-info">web</span> |</p>
+  <p id="prompt"><span id="user-display"></span> |</p>
   <input id="terminal-input" type="text" autocomplete="off" spellcheck="false" />
 </section>
 
@@ -20,7 +21,8 @@ const username = "ahmetdem";
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
     transition:
       border-color var(--transition),
       box-shadow var(--transition);
@@ -40,9 +42,30 @@ const username = "ahmetdem";
     white-space: nowrap;
   }
 
-  #browser-info {
+  #user-display {
     font-weight: 500;
     color: var(--accent);
+  }
+
+  #date-pill {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    background: var(--surface-translucent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    font-family: var(--font);
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  #date-weekday {
+    font-weight: 700;
   }
 
   #terminal-input {
@@ -84,6 +107,10 @@ const username = "ahmetdem";
     #terminal-input {
       width: 100%;
     }
+    #date-pill {
+      font-size: 15px;
+      padding: 10px 14px;
+    }
   }
 
   :global(.bookmark-match) {
@@ -116,13 +143,21 @@ const username = "ahmetdem";
 <script>
   const PREFIX_RE = /^(?:r:|m:)/;
 
+  function getDateParts(): { weekday: string; rest: string } {
+    const now = new Date();
+    const weekday = now.toLocaleDateString("en-US", { weekday: "short" });
+    const month = now.toLocaleDateString("en-US", { month: "short" });
+    const date = now.getDate();
+    return { weekday, rest: `${month} ${date}` };
+  }
+
   function detectBrowser(): string {
     const ua = navigator.userAgent;
-    if (ua.includes("Firefox")) return "firefox";
     if (ua.includes("Edg/")) return "edge";
-    if (ua.includes("Chrome")) return "chrome";
-    if (ua.includes("Safari")) return "safari";
-    return "web";
+    if (ua.includes("Chrome/")) return "chrome";
+    if (ua.includes("Firefox/")) return "firefox";
+    if (ua.includes("Safari/")) return "safari";
+    return "browser";
   }
 
   function typePlaceholder(input: HTMLInputElement, examples: string[], speed = 50) {
@@ -201,10 +236,15 @@ const username = "ahmetdem";
 
   function initializeTerminal() {
     const input = document.getElementById("terminal-input") as HTMLInputElement | null;
-    const browserInfo = document.getElementById("browser-info");
-    if (!input || !browserInfo) return;
+    const userDisplay = document.getElementById("user-display");
+    const dateWeekday = document.getElementById("date-weekday");
+    const dateRest = document.getElementById("date-rest");
+    if (!input || !userDisplay || !dateWeekday || !dateRest) return;
 
-    browserInfo.textContent = detectBrowser();
+    userDisplay.textContent = `ryan@${detectBrowser()}`;
+    const { weekday, rest } = getDateParts();
+    dateWeekday.textContent = weekday;
+    dateRest.textContent = `, ${rest}`;
 
     const examples = [
       "how to tie a tie?",
@@ -274,10 +314,13 @@ const username = "ahmetdem";
       }
     });
 
-    input.focus();
-    document.addEventListener("keydown", (e) => {
-      if (e.target === document.body) input.focus();
-    });
+    const isDesktop = window.matchMedia("(min-width: 1041px)").matches;
+    if (isDesktop) {
+      input.focus();
+      document.addEventListener("keydown", (e) => {
+        if (e.target === document.body) input.focus();
+      });
+    }
   }
 
   document.addEventListener("DOMContentLoaded", initializeTerminal);
