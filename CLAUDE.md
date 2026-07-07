@@ -42,12 +42,8 @@ There is no test suite and no linter configured in this repo.
     contract between the two components).
   - pressing Enter navigates straight to a matching bookmark if the typed text matches one, otherwise calls `navigate()`.
   - command history (Arrow Up/Down) and a typing-effect placeholder cycling through example queries.
-  - the `#date-pill` renders `<SplitFlapDate />` instead of plain text.
-- `src/components/SplitFlapDate.astro` — split-flap (airport departure board) date display. Builds one `FlipTile`
-  per character (client-side JS, DOM created dynamically so its CSS rules use `:global()`), each mechanically
-  spinning forward through a fixed alphabet (`" ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"`) from a blank state to its
-  target character, landing with a bounce. Tiles are staggered on load for a less synced, more physical feel.
-  Always renders a fixed dark board regardless of site theme, matching real split-flap hardware.
+  - the `#date-pill` shows a bold weekday (custom `WEEKDAY_ABBR` list, e.g. "TUES"/"THURS" to disambiguate from
+    "TUE"/"THU") followed by `Mon D YY` (last 3 digits of the year), set via `getDateParts()`.
 - `src/content/bookmarks.md` — data-only file: frontmatter `links` array, no rendered markdown body. Each entry is
   `{ href, title, alt?, category?, src? | (srcLight & srcDark) }`. Use the `srcLight`/`srcDark` pair for icons that
   need different colors per theme (the component swaps which `<img>` is visible via CSS based on `data-theme`); use

@@ -1,8 +1,7 @@
 ---
-import SplitFlapDate from "./SplitFlapDate.astro";
 ---
 
-<p id="date-pill"><SplitFlapDate /></p>
+<p id="date-pill"><b id="date-weekday"></b><span id="date-rest"></span></p>
 
 <section>
   <p id="prompt"><span id="user-display"></span> |</p>
@@ -63,6 +62,10 @@ import SplitFlapDate from "./SplitFlapDate.astro";
     font-weight: 400;
     color: var(--muted);
     white-space: nowrap;
+  }
+
+  #date-weekday {
+    font-weight: 700;
   }
 
   #terminal-input {
@@ -139,6 +142,17 @@ import SplitFlapDate from "./SplitFlapDate.astro";
 
 <script>
   const PREFIX_RE = /^(?:r:|m:)/;
+
+  const WEEKDAY_ABBR = ["SUN", "MON", "TUES", "WED", "THURS", "FRI", "SAT"];
+
+  function getDateParts(): { weekday: string; rest: string } {
+    const now = new Date();
+    const weekday = WEEKDAY_ABBR[now.getDay()];
+    const month = now.toLocaleDateString("en-US", { month: "short" });
+    const date = now.getDate();
+    const year = String(now.getFullYear()).slice(-3);
+    return { weekday, rest: `${month} ${date} ${year}` };
+  }
 
   function detectBrowser(): string {
     const ua = navigator.userAgent;
@@ -226,9 +240,14 @@ import SplitFlapDate from "./SplitFlapDate.astro";
   function initializeTerminal() {
     const input = document.getElementById("terminal-input") as HTMLInputElement | null;
     const userDisplay = document.getElementById("user-display");
-    if (!input || !userDisplay) return;
+    const dateWeekday = document.getElementById("date-weekday");
+    const dateRest = document.getElementById("date-rest");
+    if (!input || !userDisplay || !dateWeekday || !dateRest) return;
 
     userDisplay.textContent = `ryan@${detectBrowser()}`;
+    const { weekday, rest } = getDateParts();
+    dateWeekday.textContent = weekday;
+    dateRest.textContent = ` ${rest}`;
 
     const examples = [
       "how to tie a tie?",
