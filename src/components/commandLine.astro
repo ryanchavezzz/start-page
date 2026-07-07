@@ -68,6 +68,11 @@
     font-family: "Inter", var(--font);
     font-weight: 700;
     letter-spacing: -0.02em;
+    color: var(--accent);
+  }
+
+  #date-rest {
+    margin-left: 0.4em;
   }
 
   #terminal-input {
@@ -248,7 +253,7 @@
     userDisplay.textContent = `ryan@${detectBrowser()}`;
     const { weekday, rest } = getDateParts();
     dateWeekday.textContent = weekday;
-    dateRest.textContent = ` ${rest}`;
+    dateRest.textContent = rest;
 
     const examples = [
       "how to tie a tie?",
