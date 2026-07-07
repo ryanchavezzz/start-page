@@ -65,7 +65,9 @@
   }
 
   #date-weekday {
+    font-family: "Inter", var(--font);
     font-weight: 700;
+    letter-spacing: -0.02em;
   }
 
   #terminal-input {
@@ -143,15 +145,14 @@
 <script>
   const PREFIX_RE = /^(?:r:|m:)/;
 
-  const WEEKDAY_ABBR = ["SUN", "MON", "TUES", "WED", "THURS", "FRI", "SAT"];
+  const WEEKDAY_ABBR = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
 
   function getDateParts(): { weekday: string; rest: string } {
     const now = new Date();
     const weekday = WEEKDAY_ABBR[now.getDay()];
-    const month = now.toLocaleDateString("en-US", { month: "short" });
+    const month = now.toLocaleDateString("en-US", { month: "long" });
     const date = now.getDate();
-    const year = String(now.getFullYear()).slice(-3);
-    return { weekday, rest: `${month} ${date} ${year}` };
+    return { weekday, rest: `${month} ${date}` };
   }
 
   function detectBrowser(): string {
