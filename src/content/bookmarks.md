@@ -167,6 +167,11 @@ links:
     title: Bambu Lab
     alt: bambu-lab-icon
     category: printing
+  - href: https://bento3d.design/tray
+    title: Bento3D
+    src: bento.svg
+    alt: bento3d-icon
+    category: printing
   - href: https://www.ebay.com
     title: eBay
     srcLight: ebay-light.svg
