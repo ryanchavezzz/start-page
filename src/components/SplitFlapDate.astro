@@ -1,0 +1,310 @@
+---
+---
+
+<div class="flap-board" id="flap-date" aria-hidden="true"></div>
+<span class="sr-only" id="flap-date-sr"></span>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .flap-board {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.16em;
+  }
+
+  :global(.flap-group) {
+    display: inline-flex;
+    gap: 0.05em;
+  }
+
+  :global(.flap-sep) {
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  :global(.flap-gap) {
+    display: inline-block;
+    width: 0.28em;
+  }
+
+  :global(.flap) {
+    position: relative;
+    width: 0.64em;
+    height: 1.05em;
+    border-radius: 0.09em;
+    background: #17171b;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 1px 2px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    perspective: 6em;
+  }
+
+  :global(.flap::after) {
+    content: "";
+    position: absolute;
+    top: calc(50% - 0.6px);
+    left: 0;
+    width: 100%;
+    height: 1.2px;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 5;
+  }
+
+  :global(.flap-half) {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    overflow: hidden;
+  }
+
+  :global(.flap-top) {
+    top: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.14));
+  }
+
+  :global(.flap-bottom) {
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.05));
+  }
+
+  :global(.flap-half .glyph) {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 200%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font);
+    font-weight: 700;
+    font-size: 0.64em;
+    color: #f1f1ef;
+  }
+
+  :global(.flap-top .glyph) {
+    top: 0;
+  }
+
+  :global(.flap-bottom .glyph) {
+    bottom: 0;
+  }
+
+  :global(.flap-fold) {
+    z-index: 6;
+    backface-visibility: hidden;
+  }
+
+  :global(.flap-fold-top) {
+    transform-origin: 50% 100%;
+    transform: rotateX(0deg);
+  }
+
+  :global(.flap-fold-bottom) {
+    transform-origin: 50% 0%;
+    transform: rotateX(90deg);
+  }
+
+  :global(.flap-fold-top.flap-anim-top) {
+    animation: flapDown var(--dur, 90ms) cubic-bezier(0.5, 0, 0.75, 0.35) forwards;
+  }
+
+  :global(.flap-fold-bottom.flap-anim-bottom) {
+    animation: flapUp var(--dur, 90ms) cubic-bezier(0.28, 1.4, 0.55, 1) forwards;
+  }
+
+  @keyframes flapDown {
+    from {
+      transform: rotateX(0deg);
+    }
+    to {
+      transform: rotateX(-90deg);
+    }
+  }
+
+  @keyframes flapUp {
+    0% {
+      transform: rotateX(90deg);
+    }
+    70% {
+      transform: rotateX(-6deg);
+    }
+    100% {
+      transform: rotateX(0deg);
+    }
+  }
+</style>
+
+<script>
+  const SEQUENCE = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
+
+  function indexFor(ch: string): number {
+    const i = SEQUENCE.indexOf(ch.toUpperCase());
+    return i === -1 ? 0 : i;
+  }
+
+  function el(tag: string, className?: string): HTMLElement {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    return node;
+  }
+
+  class FlipTile {
+    root: HTMLElement;
+    private topGlyph: HTMLElement;
+    private bottomGlyph: HTMLElement;
+    private foldTop: HTMLElement;
+    private foldTopGlyph: HTMLElement;
+    private foldBottom: HTMLElement;
+    private foldBottomGlyph: HTMLElement;
+    private current = " ";
+
+    constructor() {
+      this.root = el("span", "flap");
+
+      const top = el("span", "flap-half flap-top");
+      this.topGlyph = el("span", "glyph");
+      top.appendChild(this.topGlyph);
+
+      const bottom = el("span", "flap-half flap-bottom");
+      this.bottomGlyph = el("span", "glyph");
+      bottom.appendChild(this.bottomGlyph);
+
+      this.foldTop = el("span", "flap-half flap-fold flap-fold-top");
+      this.foldTopGlyph = el("span", "glyph");
+      this.foldTop.appendChild(this.foldTopGlyph);
+
+      this.foldBottom = el("span", "flap-half flap-fold flap-fold-bottom");
+      this.foldBottomGlyph = el("span", "glyph");
+      this.foldBottom.appendChild(this.foldBottomGlyph);
+
+      this.topGlyph.textContent = " ";
+      this.bottomGlyph.textContent = " ";
+      this.foldTop.style.setProperty("--dur", "0ms");
+      this.foldBottom.style.setProperty("--dur", "0ms");
+
+      this.root.append(top, bottom, this.foldTop, this.foldBottom);
+    }
+
+    private step(next: string, durationMs: number): Promise<void> {
+      return new Promise((resolve) => {
+        const prev = this.current;
+        this.foldTopGlyph.textContent = prev;
+        this.foldBottomGlyph.textContent = next;
+
+        this.topGlyph.textContent = next;
+        this.bottomGlyph.textContent = next;
+        this.current = next;
+
+        this.foldTop.style.setProperty("--dur", `${durationMs}ms`);
+        this.foldBottom.style.setProperty("--dur", `${durationMs}ms`);
+
+        let settled = false;
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          this.foldTop.classList.remove("flap-anim-top");
+          this.foldBottom.classList.remove("flap-anim-bottom");
+          this.foldTop.removeEventListener("animationend", onTopEnd);
+          this.foldBottom.removeEventListener("animationend", onBottomEnd);
+          resolve();
+        };
+
+        let topDone = false;
+        let bottomDone = false;
+        const onTopEnd = () => {
+          topDone = true;
+          if (bottomDone) finish();
+        };
+        const onBottomEnd = () => {
+          bottomDone = true;
+          if (topDone) finish();
+        };
+        this.foldTop.addEventListener("animationend", onTopEnd);
+        this.foldBottom.addEventListener("animationend", onBottomEnd);
+
+        // Safety net in case the tab is backgrounded and animationend never fires.
+        setTimeout(finish, durationMs + 150);
+
+        requestAnimationFrame(() => {
+          this.foldTop.classList.add("flap-anim-top");
+          this.foldBottom.classList.add("flap-anim-bottom");
+        });
+      });
+    }
+
+    async spinTo(target: string) {
+      const targetIdx = indexFor(target);
+      const startIdx = indexFor(this.current);
+      const steps = (targetIdx - startIdx + SEQUENCE.length) % SEQUENCE.length;
+
+      for (let s = 1; s <= steps; s++) {
+        const char = SEQUENCE[(startIdx + s) % SEQUENCE.length];
+        const remaining = steps - s;
+        const duration = remaining === 0 ? 260 : remaining < 3 ? 150 : 70;
+        await this.step(char, duration);
+      }
+    }
+  }
+
+  function makeGroup(chars: string[]): { el: HTMLElement; tiles: FlipTile[] } {
+    const group = document.createElement("span");
+    group.className = "flap-group";
+    const tiles = chars.map(() => new FlipTile());
+    tiles.forEach((tile) => group.appendChild(tile.root));
+    return { el: group, tiles };
+  }
+
+  function gapEl(): HTMLElement {
+    return el("span", "flap-gap");
+  }
+
+  function sepEl(char: string): HTMLElement {
+    const node = el("span", "flap-sep");
+    node.textContent = char;
+    return node;
+  }
+
+  function initSplitFlapDate() {
+    const board = document.getElementById("flap-date");
+    const sr = document.getElementById("flap-date-sr");
+    if (!board) return;
+
+    const now = new Date();
+    const weekday = now.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+    const month = now.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+    const day = String(now.getDate());
+
+    if (sr) sr.textContent = `${weekday}, ${month} ${day}`;
+
+    const weekdayGroup = makeGroup(weekday.split(""));
+    const monthGroup = makeGroup(month.split(""));
+    const dayGroup = makeGroup(day.split(""));
+
+    board.append(weekdayGroup.el, sepEl(","), gapEl(), monthGroup.el, gapEl(), dayGroup.el);
+
+    const scheduled = [
+      ...weekdayGroup.tiles.map((tile, i) => ({ tile, char: weekday[i] })),
+      ...monthGroup.tiles.map((tile, i) => ({ tile, char: month[i] })),
+      ...dayGroup.tiles.map((tile, i) => ({ tile, char: day[i] })),
+    ];
+
+    scheduled.forEach(({ tile, char }, i) => {
+      setTimeout(() => tile.spinTo(char), i * 90);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", initSplitFlapDate);
+</script>
