@@ -106,7 +106,7 @@ links:
     alt: github-icon
     category: dev
   - href: https://news.ycombinator.com
-    title: Hacker News
+    title: HN
     srcLight: hacker-news-light.svg
     srcDark: hacker-news-dark.svg
     alt: hacker-news-icon
