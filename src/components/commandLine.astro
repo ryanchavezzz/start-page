@@ -8,6 +8,16 @@
   <input id="terminal-input" type="text" autocomplete="off" spellcheck="false" />
 </section>
 
+<div id="shortcuts-modal-overlay" class="modal-overlay hidden">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="shortcuts-modal-title">
+    <div class="modal-header">
+      <h2 id="shortcuts-modal-title">Search Shortcuts</h2>
+      <button id="shortcuts-modal-close" type="button" aria-label="Close">&times;</button>
+    </div>
+    <ul id="shortcuts-modal-list" class="modal-list"></ul>
+  </div>
+</div>
+
 <style>
   section {
     display: flex;
@@ -145,6 +155,94 @@
     filter: none !important;
     transform: translateX(2px) !important;
   }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: color-mix(in srgb, black 45%, transparent);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.hidden {
+    display: none;
+  }
+
+  .modal {
+    width: min(480px, 100%);
+    max-height: min(70vh, 600px);
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    font-family: var(--mono);
+    overflow: hidden;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  #shortcuts-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--muted);
+    padding: 4px;
+  }
+
+  #shortcuts-modal-close:hover {
+    color: var(--text);
+  }
+
+  .modal-list {
+    margin: 0;
+    padding: 8px 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  :global(.modal-list li) {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    column-gap: 12px;
+    align-items: baseline;
+    padding: 6px 18px;
+    font-size: 14px;
+  }
+
+  :global(.modal-list li:hover) {
+    background: var(--hover);
+  }
+
+  :global(.modal-shortcuts) {
+    color: var(--accent);
+    word-break: break-word;
+  }
+
+  :global(.modal-title) {
+    color: var(--muted);
+  }
 </style>
 
 <script>
@@ -262,12 +360,61 @@
     return null;
   }
 
+  function buildShortcutEntries(): { title: string; shortcuts: string[] }[] {
+    return [
+      { title: "Reddit (site search via Google)", shortcuts: ["r"] },
+      { title: "MyAnimeList (site search via Google)", shortcuts: ["m"] },
+      ...SEARCH_ENGINES.map((engine) => ({ title: engine.title, shortcuts: engine.shortcuts })),
+    ];
+  }
+
+  function populateShortcutsModal(list: HTMLUListElement) {
+    for (const entry of buildShortcutEntries()) {
+      const li = document.createElement("li");
+
+      const shortcuts = document.createElement("span");
+      shortcuts.className = "modal-shortcuts";
+      shortcuts.textContent = entry.shortcuts.map((s) => `${s}:`).join(", ");
+
+      const title = document.createElement("span");
+      title.className = "modal-title";
+      title.textContent = entry.title;
+
+      li.append(shortcuts, title);
+      list.appendChild(li);
+    }
+  }
+
   function initializeTerminal() {
     const input = document.getElementById("terminal-input") as HTMLInputElement | null;
     const userDisplay = document.getElementById("user-display");
     const dateWeekday = document.getElementById("date-weekday");
     const dateRest = document.getElementById("date-rest");
-    if (!input || !userDisplay || !dateWeekday || !dateRest) return;
+    const modalOverlay = document.getElementById("shortcuts-modal-overlay");
+    const modalClose = document.getElementById("shortcuts-modal-close");
+    const modalList = document.getElementById("shortcuts-modal-list") as HTMLUListElement | null;
+    if (!input || !userDisplay || !dateWeekday || !dateRest || !modalOverlay || !modalClose || !modalList) return;
+
+    populateShortcutsModal(modalList);
+
+    function showShortcutsModal() {
+      modalOverlay!.classList.remove("hidden");
+    }
+
+    function hideShortcutsModal() {
+      modalOverlay!.classList.add("hidden");
+      input!.focus();
+    }
+
+    modalClose.addEventListener("click", hideShortcutsModal);
+    modalOverlay.addEventListener("click", (event) => {
+      if (event.target === modalOverlay) hideShortcutsModal();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !modalOverlay!.classList.contains("hidden")) {
+        hideShortcutsModal();
+      }
+    });
 
     userDisplay.textContent = `ryan@${detectBrowser()}`;
     const { weekday, rest } = getDateParts();
@@ -282,6 +429,7 @@
       "search youtube with yt:query, g: for google, and more",
       "type a domain to navigate",
       "press ctrl+c to clear",
+      "type ? to see all search shortcuts",
     ];
 
     const elements = document.querySelectorAll<HTMLAnchorElement>(".bookmark-section a");
@@ -292,6 +440,11 @@
     resetStyles(elements);
 
     input.addEventListener("input", () => {
+      if (input.value === "?") {
+        input.value = "";
+        showShortcutsModal();
+        return;
+      }
       highlightMatches(input.value.toLowerCase(), elements);
     });
 
