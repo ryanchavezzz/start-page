@@ -148,7 +148,16 @@
 </style>
 
 <script>
-  const PREFIX_RE = /^(?:r:|m:)/;
+  import { SEARCH_ENGINES } from "../lib/searchEngines";
+
+  const PREFIX_RE = /^[a-z0-9]+:/i;
+
+  const SHORTCUT_URLS = new Map<string, string>();
+  for (const engine of SEARCH_ENGINES) {
+    for (const shortcut of engine.shortcuts) {
+      SHORTCUT_URLS.set(shortcut, engine.url);
+    }
+  }
 
   const WEEKDAY_ABBR = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
 
@@ -217,15 +226,25 @@
   }
 
   function navigate(value: string) {
-    if (value.startsWith("r:")) {
-      const q = value.slice(2).trim();
-      window.location.href = `https://google.com/search?q=${encodeURIComponent(`site:reddit.com ${q}`)}`;
-      return;
-    }
-    if (value.startsWith("m:")) {
-      const q = value.slice(2).trim();
-      window.location.href = `https://google.com/search?q=${encodeURIComponent(`site:myanimelist.net ${q}`)}`;
-      return;
+    const prefixMatch = value.match(/^([a-z0-9]+):(.*)$/i);
+    if (prefixMatch) {
+      const [, shortcut, rest] = prefixMatch;
+      const query = rest.trim();
+      const key = shortcut.toLowerCase();
+
+      if (key === "r") {
+        window.location.href = `https://google.com/search?q=${encodeURIComponent(`site:reddit.com ${query}`)}`;
+        return;
+      }
+      if (key === "m") {
+        window.location.href = `https://google.com/search?q=${encodeURIComponent(`site:myanimelist.net ${query}`)}`;
+        return;
+      }
+      const urlTemplate = SHORTCUT_URLS.get(key);
+      if (urlTemplate) {
+        window.location.href = urlTemplate.replace("%s", encodeURIComponent(query));
+        return;
+      }
     }
     if (/^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(value)) {
       window.location.href = `https://${value}`;
@@ -260,6 +279,7 @@
       "today's weather",
       "search reddit with r:query",
       "search myanimelist with m:query",
+      "search youtube with yt:query, g: for google, and more",
       "type a domain to navigate",
       "press ctrl+c to clear",
     ];
