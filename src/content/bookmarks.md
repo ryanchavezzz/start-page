@@ -193,13 +193,40 @@ links:
     title: MyAnonamouse
     alt: myanonamouse-icon
     category: torrents
+  - href: https://jackett.rchvz.dev/
+    title: Jackett
+    src: jackett-icon.svg
+    alt: jackett-icon
+    category: torrents
+  - href: https://rtorrent.rchvz.dev/
+    title: rTorrent
+    src: rutorrent-icon.svg
+    alt: rutorrent-icon
+    category: torrents
+  - href: https://whatbox.ca/manage
+    title: Whatbox
+    src: whatbox-icon.svg
+    alt: whatbox-icon
+    category: torrents
+  - href: https://flood.rchvz.dev/
+    title: Flood
+    src: flood-icon.svg
+    alt: flood-icon
+    category: torrents
   - href: https://vinelink.vineapps.com/state/CA
     title: VINELink
     alt: vinelink-icon
     category: misc
   - href: https://brutalist.report/
     title: Brutalist Report
+    src: brutalist-report-icon.svg
     alt: brutalist-report-icon
+    category: misc
+  - href: https://wifiman.com/
+    title: WifiMan
+    srcLight: wifiman-light.svg
+    srcDark: wifiman-dark.svg
+    alt: wifiman-icon
     category: misc
   - href: https://www.melissa.com/v2/lookups/
     title: Melissa Lookups
