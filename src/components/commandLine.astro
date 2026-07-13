@@ -373,6 +373,13 @@
     });
   }
 
+  function hasKnownShortcutPrefix(value: string): boolean {
+    const prefixMatch = value.match(/^([a-z0-9]+):/i);
+    if (!prefixMatch) return false;
+    const key = prefixMatch[1].toLowerCase();
+    return key === "r" || key === "m" || SHORTCUT_URLS.has(key);
+  }
+
   function navigate(value: string) {
     const prefixMatch = value.match(/^([a-z0-9]+):(.*)$/i);
     if (prefixMatch) {
@@ -554,7 +561,7 @@
         history.push(value);
         historyIndex = history.length;
 
-        const match = findBookmarkMatch(value.toLowerCase(), elements);
+        const match = hasKnownShortcutPrefix(value) ? null : findBookmarkMatch(value.toLowerCase(), elements);
         if (match) {
           window.location.href = match.href;
         } else {
