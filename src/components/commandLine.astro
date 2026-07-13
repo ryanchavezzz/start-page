@@ -5,7 +5,14 @@
 
 <section>
   <p id="prompt"><span id="user-display"></span> |</p>
-  <input id="terminal-input" type="text" autocomplete="off" spellcheck="false" />
+  <div id="input-wrap">
+    <input id="terminal-input" type="text" autocomplete="off" spellcheck="false" aria-label="Search or navigate" />
+    <div id="placeholder-flip" aria-hidden="true">
+      <div id="flip-viewport">
+        <div id="flip"></div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <div id="shortcuts-modal-overlay" class="modal-overlay hidden">
@@ -85,22 +92,52 @@
     margin-left: 0.4em;
   }
 
+  #input-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
   #terminal-input {
     background: none;
     border: none;
     font-family: var(--mono);
     font-size: 18px;
     color: var(--text);
-    flex: 1;
-    min-width: 0;
+    width: 100%;
   }
 
   #terminal-input:focus {
     outline: none;
   }
 
-  #terminal-input::placeholder {
+  #placeholder-flip {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+    font-family: var(--mono);
+    font-size: 18px;
     color: var(--muted);
+  }
+
+  #placeholder-flip.hidden {
+    display: none;
+  }
+
+  #flip-viewport {
+    height: 24px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  :global(#flip > div) {
+    height: 24px;
+    line-height: 24px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   @media (max-width: 1040px) {
@@ -276,26 +313,39 @@
     return "browser";
   }
 
-  function typePlaceholder(input: HTMLInputElement, examples: string[], speed = 50) {
-    let exampleIndex = 0;
-    let charIndex = 0;
+  const FLIP_ITEM_HEIGHT = 24;
+  const FLIP_SLOT_SECONDS = 2.2;
+  const FLIP_HOLD_RATIO = 0.85;
 
-    function step() {
-      const current = examples[exampleIndex];
-      if (charIndex < current.length) {
-        input.placeholder += current.charAt(charIndex);
-        charIndex++;
-        setTimeout(step, speed);
-      } else {
-        setTimeout(() => {
-          input.placeholder = "";
-          charIndex = 0;
-          exampleIndex = (exampleIndex + 1) % examples.length;
-          step();
-        }, 2000);
-      }
+  function initFlipPlaceholder(flip: HTMLElement, examples: string[]) {
+    for (const text of [...examples, examples[0]]) {
+      const row = document.createElement("div");
+      const label = document.createElement("div");
+      label.textContent = text;
+      row.appendChild(label);
+      flip.appendChild(row);
     }
-    step();
+
+    const n = examples.length;
+    const stepPercent = 100 / n;
+    const keyframeRules = ["0% { transform: translateY(0); }"];
+    for (let i = 0; i < n; i++) {
+      const holdEnd = i * stepPercent + stepPercent * FLIP_HOLD_RATIO;
+      const stepEnd = (i + 1) * stepPercent;
+      keyframeRules.push(`${holdEnd.toFixed(3)}% { transform: translateY(${-i * FLIP_ITEM_HEIGHT}px); }`);
+      keyframeRules.push(`${stepEnd.toFixed(3)}% { transform: translateY(${-(i + 1) * FLIP_ITEM_HEIGHT}px); }`);
+    }
+
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes flip-cycle {
+        ${keyframeRules.join("\n")}
+      }
+      #flip {
+        animation: flip-cycle ${(n * FLIP_SLOT_SECONDS).toFixed(1)}s cubic-bezier(0.68, -0.4, 0.27, 1.3) infinite;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   function resetStyles(elements: NodeListOf<HTMLAnchorElement>) {
@@ -321,6 +371,13 @@
       el.classList.toggle("bookmark-nomatch", !isMatch);
       el.parentElement?.classList.toggle("bookmark-nomatch-parent", !isMatch);
     });
+  }
+
+  function hasKnownShortcutPrefix(value: string): boolean {
+    const prefixMatch = value.match(/^([a-z0-9]+):/i);
+    if (!prefixMatch) return false;
+    const key = prefixMatch[1].toLowerCase();
+    return key === "r" || key === "m" || SHORTCUT_URLS.has(key);
   }
 
   function navigate(value: string) {
@@ -393,7 +450,20 @@
     const modalOverlay = document.getElementById("shortcuts-modal-overlay");
     const modalClose = document.getElementById("shortcuts-modal-close");
     const modalList = document.getElementById("shortcuts-modal-list") as HTMLUListElement | null;
-    if (!input || !userDisplay || !dateWeekday || !dateRest || !modalOverlay || !modalClose || !modalList) return;
+    const placeholderFlip = document.getElementById("placeholder-flip");
+    const flip = document.getElementById("flip");
+    if (
+      !input ||
+      !userDisplay ||
+      !dateWeekday ||
+      !dateRest ||
+      !modalOverlay ||
+      !modalClose ||
+      !modalList ||
+      !placeholderFlip ||
+      !flip
+    )
+      return;
 
     populateShortcutsModal(modalList);
 
@@ -436,7 +506,7 @@
     const history: string[] = [];
     let historyIndex = 0;
 
-    typePlaceholder(input, examples);
+    initFlipPlaceholder(flip, examples);
     resetStyles(elements);
 
     input.addEventListener("input", () => {
@@ -445,6 +515,7 @@
         showShortcutsModal();
         return;
       }
+      placeholderFlip.classList.toggle("hidden", input.value !== "");
       highlightMatches(input.value.toLowerCase(), elements);
     });
 
@@ -455,6 +526,7 @@
     input.addEventListener("keydown", (event) => {
       if (event.ctrlKey && event.key === "c") {
         input.value = "";
+        placeholderFlip.classList.remove("hidden");
         resetStyles(elements);
         return;
       }
@@ -463,6 +535,7 @@
         if (historyIndex > 0) {
           historyIndex--;
           input.value = history[historyIndex];
+          placeholderFlip.classList.toggle("hidden", input.value !== "");
           event.preventDefault();
         }
         return;
@@ -476,6 +549,7 @@
           historyIndex = history.length;
           input.value = "";
         }
+        placeholderFlip.classList.toggle("hidden", input.value !== "");
         event.preventDefault();
         return;
       }
@@ -487,7 +561,7 @@
         history.push(value);
         historyIndex = history.length;
 
-        const match = findBookmarkMatch(value.toLowerCase(), elements);
+        const match = hasKnownShortcutPrefix(value) ? null : findBookmarkMatch(value.toLowerCase(), elements);
         if (match) {
           window.location.href = match.href;
         } else {
