@@ -51,7 +51,7 @@ export function getFavoriteBookmarks(): Bookmark[] {
 }
 
 export function getBookmarkSections(): BookmarkSection[] {
-  const links = getAllBookmarks();
+  const links = getAllBookmarks().filter((link) => link.favorite === undefined);
 
   const groups = new Map<string, Bookmark[]>();
   for (const link of links) {
