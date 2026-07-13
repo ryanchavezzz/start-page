@@ -19,6 +19,7 @@ links:
     srcDark: fastmail-dark.svg
     alt: fastmail-icon
     category: mail
+    favorite: 5
   - href: https://www.messenger.com
     title: Messenger
     srcLight: facebook-messenger-light.svg
@@ -75,6 +76,7 @@ links:
     srcDark: nextdns-dark.svg
     alt: nextdns-icon
     category: accounts
+    favorite: 6
   - href: https://cloud.oracle.com/
     title: Oracle Cloud
     srcLight: oracle-light.svg
