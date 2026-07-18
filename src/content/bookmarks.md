@@ -232,6 +232,8 @@ links:
     category: misc
   - href: https://www.melissa.com/v2/lookups/
     title: Melissa Lookups
+    srcLight: melissa-lookups-light.svg
+    srcDark: melissa-lookups-dark.svg
     alt: melissa-lookups-icon
     category: misc
 ---
