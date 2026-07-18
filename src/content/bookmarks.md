@@ -193,6 +193,8 @@ links:
     category: torrents
   - href: https://www.myanonamouse.net
     title: MyAnonamouse
+    srcLight: myanonamouse-light.svg
+    srcDark: myanonamouse-dark.svg
     alt: myanonamouse-icon
     category: torrents
   - href: https://jackett.rchvz.dev/
