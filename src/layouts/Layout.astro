@@ -113,30 +113,39 @@ const { title } = Astro.props;
       ),
       linear-gradient(180deg, #f8f9fa 0%, #dee2e6 100%);
     --surface: #ffffff;
+    --surface-raised: #ffffff;
     --surface-translucent: rgba(255, 255, 255, 0.55);
-    --text: #1a1a1a;
-    --muted: #64748b;
-    --border: rgba(0, 0, 0, 0.1);
+    /* Material dark-theme-guide text emphasis, applied to light theme too:
+       high-emphasis = black @ 87%, medium-emphasis = black @ 60%. */
+    --text: rgba(0, 0, 0, 0.87);
+    --muted: rgba(0, 0, 0, 0.6);
+    --border: rgba(0, 0, 0, 0.12);
     --hover: rgba(0, 0, 0, 0.06);
     --shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
     --icon-filter: none;
   }
 
   :root[data-theme="dark"] {
-    --bg: #0f1419;
+    --accent: #4f9cf9;
+    --bg: #121212;
     --bg-gradient:
       radial-gradient(
         ellipse 80% 60% at 50% 0%,
         color-mix(in srgb, var(--accent) 28%, transparent),
         transparent 70%
       ),
-      linear-gradient(180deg, #0f1419 0%, #1a1f2e 100%);
-    --surface: #1e2530;
+      linear-gradient(180deg, #121212 0%, #1e1e1e 100%);
+    /* Material elevation-overlay system: surfaces get lighter with a white
+       overlay as elevation increases. --surface = 1dp (5%), --surface-raised
+       = 24dp/dialog (16%), both pre-composited over the #121212 baseline. */
+    --surface: #1e1e1e;
+    --surface-raised: #383838;
     --surface-translucent: rgba(255, 255, 255, 0.05);
-    --text: #e6e8eb;
-    --muted: #94a3b8;
-    --border: rgba(255, 255, 255, 0.1);
-    --hover: rgba(255, 255, 255, 0.08);
+    /* Material text emphasis: high = white @ 87%, medium = white @ 60%. */
+    --text: rgba(255, 255, 255, 0.87);
+    --muted: rgba(255, 255, 255, 0.6);
+    --border: rgba(255, 255, 255, 0.12);
+    --hover: rgba(255, 255, 255, 0.07);
     --shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
     --icon-filter: invert(1);
   }
