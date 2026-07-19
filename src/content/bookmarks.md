@@ -232,7 +232,7 @@ links:
     srcDark: wifiman-dark.svg
     alt: wifiman-icon
     category: misc
-  - href: https://www.melissa.com/v2/lookups/
+  - href: https://lookups.melissa.com/home/onelookup/
     title: Melissa Lookups
     srcLight: melissa-lookups-light.svg
     srcDark: melissa-lookups-dark.svg
